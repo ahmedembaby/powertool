@@ -201,7 +201,7 @@ def main():
     application.add_handler(CommandHandler("show_points", show_points))
     application.add_handler(CommandHandler("add_points", add_points))
     application.add_handler(CommandHandler("remove_points", remove_points))
-    application.add_handler(CommandHandler("get_qr", asyncio.get_event_loop().run_until_complete(fetch_qr_code())))
+   
     # بدء البوت
     application.run_polling()
 
