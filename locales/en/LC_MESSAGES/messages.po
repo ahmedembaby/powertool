@@ -1,1 +1,40 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
 
+msgid "Welcome!"
+msgstr "Welcome!"
+
+msgid "List of available commands:"
+msgstr "List of available commands:"
+
+msgid "/help - Display the list of commands"
+msgstr "/help - Display the list of commands"
+
+msgid "/show_points - Display your points"
+msgstr "/show_points - Display your points"
+
+msgid "/add_points - Add points (admin only)"
+msgstr "/add_points - Add points (admin only)"
+
+msgid "/remove_points - Remove points (admin only)"
+msgstr "/remove_points - Remove points (admin only)"
+
+msgid "/promote - Promote a user to admin (admin only)"
+msgstr "/promote - Promote a user to admin (admin only)"
+
+msgid "/show_users - Display registered users (admin only)"
+msgstr "/show_users - Display registered users (admin only)"
+
+msgid "🚫 This command is only available for admins."
+msgstr "🚫 This command is only available for admins."
+
+msgid "✅ User promoted successfully."
+msgstr "✅ User promoted successfully."
+
+msgid "⚠️ Please provide input as follows: /add_points <USER_Name> <POINTS>"
+msgstr "⚠️ Please provide input as follows: /add_points <USER_Name> <POINTS>"
+
+msgid "✅ Points added successfully."
+msgstr "✅ Points added successfully."
