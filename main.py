@@ -25,11 +25,51 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT,
     last_name TEXT,
     is_admin INTEGER DEFAULT 0,
-    points INTEGER DEFAULT 0
+    points INTEGER DEFAULT 0,
+    preferred_language TEXT DEFAULT 'en'
 )
 """)
 conn.commit()
 conn.close()
+
+
+async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    try:
+        new_language = context.args[0]
+        if new_language not in ['ar', 'en']:
+            raise ValueError("Invalid language")
+
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET preferred_language = ? WHERE id = ?", (new_language, user_id))
+        conn.commit()
+        conn.close()
+
+        await update.message.reply_text(_("✅ تم تغيير اللغة إلى ") + new_language)
+    except (IndexError, ValueError):
+        await update.message.reply_text(_("⚠️ يرجى تحديد اللغة كالتالي: /change_language <ar|en>"))
+
+
+def get_user_language(user_id):
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT preferred_language FROM users WHERE id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else 'en'
+
+# تحديث إعداد اللغة في كل وظيفة
+async def localized_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str):
+    user_language = get_user_language(update.effective_user.id)
+    localization = translation('messages', localedir='locales', languages=[user_language])
+    localization.install()
+    _ = localization.gettext
+
+    await update.message.reply_text(_(message))
+
+
 
 # Admin
 def is_admin(user_id):
@@ -216,19 +256,21 @@ def main():
 
     # إعداد قائمة الأوامر للبوت
     commands = [
-        BotCommand("start", _( "تسجيل المستخدم في قاعدة البيانات")),
-        BotCommand("help", _( "عرض قائمة الأوامر")),
-        BotCommand("show_users", _( "عرض المستخدمين المسجلين (للمسؤولين فقط)")),
-        BotCommand("promote", _( "ترقية مستخدم إلى مسؤول (للمسؤولين فقط)")),
-        BotCommand("show_points", _( "عرض نقاطك الحالية")),
-        BotCommand("add_points", _( "إضافة نقاط لمستخدم (للمسؤولين فقط)")),
-        BotCommand("remove_points", _( "خصم نقاط من مستخدم (للمسؤولين فقط)")),
-    ]
-    application.bot.set_my_commands(commands)
+    BotCommand("start", _("تسجيل المستخدم في قاعدة البيانات")),
+    BotCommand("help", _("عرض قائمة الأوامر")),
+    BotCommand("show_users", _("عرض المستخدمين المسجلين (للمسؤولين فقط)")),
+    BotCommand("promote", _("ترقية مستخدم إلى مسؤول (للمسؤولين فقط)")),
+    BotCommand("show_points", _("عرض نقاطك الحالية")),
+    BotCommand("add_points", _("إضافة نقاط لمستخدم (للمسؤولين فقط)")),
+    BotCommand("remove_points", _("خصم نقاط من مستخدم (للمسؤولين فقط)")),
+    BotCommand("change_language", _("تغيير اللغة المفضلة")),
+]
+application.bot.set_my_commands(commands)
 
     # إضافة Handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("change_language", change_language))
     application.add_handler(CommandHandler("show_users", show_users))
     application.add_handler(CommandHandler("promote", promote_user))
     application.add_handler(CommandHandler("show_points", show_points))
