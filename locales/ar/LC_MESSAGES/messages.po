@@ -1,1 +1,41 @@
 
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+msgid "Welcome!"
+msgstr "مرحبًا!"
+
+msgid "List of available commands:"
+msgstr "قائمة الأوامر المتاحة:"
+
+msgid "/help - Display the list of commands"
+msgstr "/help - عرض قائمة الأوامر"
+
+msgid "/show_points - Display your points"
+msgstr "/show_points - عرض نقاطك"
+
+msgid "/add_points - Add points (admin only)"
+msgstr "/add_points - إضافة نقاط (للمسؤولين فقط)"
+
+msgid "/remove_points - Remove points (admin only)"
+msgstr "/remove_points - خصم نقاط (للمسؤولين فقط)"
+
+msgid "/promote - Promote a user to admin (admin only)"
+msgstr "/promote - ترقية مستخدم إلى مسؤول (للمسؤولين فقط)"
+
+msgid "/show_users - Display registered users (admin only)"
+msgstr "/show_users - عرض المستخدمين المسجلين (للمسؤولين فقط)"
+
+msgid "🚫 This command is only available for admins."
+msgstr "🚫 هذا الأمر متاح فقط للمسؤولين."
+
+msgid "✅ User promoted successfully."
+msgstr "✅ تم ترقية المستخدم بنجاح."
+
+msgid "⚠️ Please provide input as follows: /add_points <USER_Name> <POINTS>"
+msgstr "⚠️ يرجى تقديم المدخلات كالتالي: /add_points <USER_Name> <POINTS>"
+
+msgid "✅ Points added successfully."
+msgstr "✅ تم إضافة النقاط بنجاح."
