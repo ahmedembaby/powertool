@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 from gettext import translation
 import aiohttp
+from pyppeteer import launch
+import aiofiles
 
 # إعداد السجل لتسجيل الأخطاء والأنشطة
 logging.basicConfig(level=logging.INFO)
@@ -300,10 +302,43 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     data = await response.text()
                     await update.message.reply_text(_(f"📄 تم جلب البيانات بنجاح:\n{data}"))
                 else:
-                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status}"))
+                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status} & {response.text}"))
     except Exception as e:
         logger.error(f"Error fetching session data: {e}")
         await update.message.reply_text(_("⚠️ حدث خطأ أثناء جلب البيانات."))
+
+
+#getsession
+async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = update.effective_user.username
+    url = f"https://flayers.onrender.com/qrcode/{user_id}/{user}"
+  
+
+    try:
+        # إنشاء متصفح في الوضع الخفي
+        browser = await launch(headless=True)
+        page = await browser.newPage()
+
+        # الانتقال إلى الرابط
+        await page.goto(url)
+
+        # التقاط لقطة شاشة
+        screenshot_path = f"screenshot_{user_id}.png"
+        await page.screenshot({'path': screenshot_path})
+
+        # إغلاق المتصفح
+        await browser.close()
+
+        # إرسال لقطة الشاشة إلى المستخدم
+        async with aiofiles.open(screenshot_path, 'rb') as file:
+            await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
+
+        # حذف لقطة الشاشة بعد إرسالها (اختياري)
+        os.remove(screenshot_path)
+    except Exception as e:
+        logger.error(f"Error capturing screenshot: {e}")
+        await update.message.reply_text(_("⚠️ حدث خطأ أثناء التقاط لقطة الشاشة."))
 
 
 def main():
