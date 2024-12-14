@@ -315,26 +315,26 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id    
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
     try:
-        # عمل طلب HTTP غير متزامن باستخدام aiohttp
+        # طلب HTTP لجلب الصورة
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
                     # حفظ الصورة مؤقتًا
-                    image_path = f"qrcode_{user_id}.png"
-                    async with aiofiles.open(image_path, "wb") as file:
-                        await file.write(await response.read())  # تأكد من أن `await` موجود هنا
+                    file_path = f"temp_qrcode_{user_id}.png"
+                    async with aiofiles.open(file_path, "wb") as file:
+                        await file.write(await response.read())  # قراءة البيانات باستخدام await
 
                     # إرسال الصورة إلى المستخدم
-                    async with aiofiles.open(image_path, "rb") as file:
+                    with open(file_path, "rb") as file:
                         await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
 
                     # حذف الملف المؤقت
-                    os.remove(image_path)
+                    os.remove(file_path)
                 else:
                     await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
         logger.error(f"Error fetching session image: {e}")
-        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")  # تأكد من وضع `await`
+        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")
 
 
 def main():
