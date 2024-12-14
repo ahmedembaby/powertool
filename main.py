@@ -313,8 +313,8 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #getsession
 async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    user = update.effective_user.username
-    url = f"https://flayers.onrender.com/qrcode/{user_id}/{user}"
+    
+    url = f"https://flayers.onrender.com/qrcode/{user_id}"
   
 
     try:
@@ -323,7 +323,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
         page = await browser.newPage()
 
         # الانتقال إلى الرابط
-        print(url)
+     
         await page.goto(url)
 
         # التقاط لقطة شاشة
