@@ -328,8 +328,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     with open(file_path, "rb") as file:
                         await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
 
-                    # حذف الملف المؤقت
-                    os.remove(file_path)
+
                 else:
                     await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
