@@ -6,6 +6,7 @@ import sqlite3
 from dotenv import load_dotenv
 import os
 from gettext import translation
+import aiohttp
 
 # إعداد السجل لتسجيل الأخطاء والأنشطة
 logging.basicConfig(level=logging.INFO)
@@ -286,6 +287,24 @@ async def promote_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(_("⚠️ حدث خطأ أثناء ترقية المستخدم."))
 
 
+#makesession
+async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    url = "https://flayers.onrender.com/add-session/{user_id}/a"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.text()
+                    await update.message.reply_text(_(f"📄 تم جلب البيانات بنجاح:\n{data}"))
+                else:
+                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status}"))
+    except Exception as e:
+        logger.error(f"Error fetching session data: {e}")
+        await update.message.reply_text(_("⚠️ حدث خطأ أثناء جلب البيانات."))
+
+
 def main():
     # إنشاء تطبيق البوت
     application = Application.builder().token(TOKEN).build()
@@ -300,6 +319,7 @@ def main():
         BotCommand("add_points", _( "إضافة نقاط لمستخدم (للمسؤولين فقط)")),
         BotCommand("remove_points", _( "خصم نقاط من مستخدم (للمسؤولين فقط)")),
         BotCommand("change_language", _( "تغيير اللغة المفضلة")),
+        BotCommand("make_session", _( "جلب جلسة جديدة")),
     ]
     application.bot.set_my_commands(commands)
 
@@ -312,6 +332,7 @@ def main():
     application.add_handler(CommandHandler("show_points", show_points))
     application.add_handler(CommandHandler("add_points", add_points))
     application.add_handler(CommandHandler("remove_points", remove_points))
+    application.add_handler(CommandHandler("make_session", make_session))
 
     # بدء البوت
     application.run_polling()
