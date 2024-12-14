@@ -323,6 +323,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
         page = await browser.newPage()
 
         # الانتقال إلى الرابط
+        print(url)
         await page.goto(url)
 
         # التقاط لقطة شاشة
