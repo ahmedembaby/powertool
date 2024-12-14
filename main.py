@@ -9,6 +9,8 @@ from gettext import translation
 import aiohttp
 import requests
 import aiofiles
+from PIL import Image
+import io
 
 # إعداد السجل لتسجيل الأخطاء والأنشطة
 logging.basicConfig(level=logging.INFO)
@@ -316,19 +318,34 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
     try:
         # طلب HTTP لجلب الصورة
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    # حفظ الصورة مؤقتًا
-                    file_path = f"temp_qrcode_{user_id}.png"
-                    async with aiofiles.open(file_path, "wb") as file:
-                        await file.write(await response.read())  # قراءة البيانات باستخدام await
+       async with aiohttp.ClientSession() as session:
+       async with session.get(url) as response:
+        content_type = response.headers.get('Content-Type', '')
+        if 'image' not in content_type:
+            logger.error(f"Invalid content type: {content_type}")
+            await update.message.reply_text("⚠️ الرابط لا يُرجع صورة.")
+        else:
+            image_data = await response.read()
 
-                    # إرسال الصورة إلى المستخدم
-                    with open(file_path, "rb") as file:
-                        await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
+                    # التحقق من أن البيانات تمثل صورة صالحة
+                    try:
+                        image = Image.open(io.BytesIO(image_data))
+                        image.verify()  # التحقق من صحة الصورة
 
+                        # حفظ الصورة مؤقتًا
+                        file_path = f"temp_qrcode_{user_id}.png"
+                        async with aiofiles.open(file_path, "wb") as file:
+                            await file.write(image_data)
 
+                        # إرسال الصورة إلى المستخدم
+                        with open(file_path, "rb") as file:
+                            await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
+
+                        # حذف الملف المؤقت
+                        os.remove(file_path)
+                    except Exception as img_error:
+                        logger.error(f"Image processing failed: {img_error}")
+                        await update.message.reply_text("⚠️ البيانات المستلمة ليست صورة صالحة.")
                 else:
                     await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
