@@ -317,32 +317,28 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
   
 
-    try:
-        # إنشاء متصفح في الوضع الخفي
-        browser = await launch(headless=True)
-        page = await browser.newPage()
+ try:
+        # إرسال طلب GET إلى الرابط
+        response = requests.get(url)
+        
+        # التحقق من نجاح الطلب
+        if response.status_code == 200:
+            # حفظ الصورة مؤقتًا
+            image_path = f"qrcode_{user_id}.png"
+            with open(image_path, "wb") as file:
+                file.write(response.content)
 
-        # الانتقال إلى الرابط
-     
-        await page.goto(url)
+            # إرسال الصورة إلى المستخدم
+            async with aiofiles.open(image_path, "rb") as file:
+                await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
 
-        # التقاط لقطة شاشة
-        screenshot_path = f"screenshot_{user_id}.png"
-        await page.screenshot({'path': screenshot_path})
-
-        # إغلاق المتصفح
-        await browser.close()
-
-        # إرسال لقطة الشاشة إلى المستخدم
-        async with aiofiles.open(screenshot_path, 'rb') as file:
-            await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
-
-        # حذف لقطة الشاشة بعد إرسالها (اختياري)
-        os.remove(screenshot_path)
+            # حذف الصورة بعد إرسالها (اختياري)
+            os.remove(image_path)
+        else:
+            await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status_code}")
     except Exception as e:
-        logger.error(f"Error capturing screenshot: {e}")
-        print(url)
-        await update.message.reply_text(_("⚠️ حدث خطأ أثناء التقاط لقطة الشاشة."))
+        logger.error(f"Error fetching session image: {e}")
+        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")
 
 
 def main():
