@@ -315,24 +315,23 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id    
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
     try:
-        # إرسال طلب GET إلى الرابط
-        response = requests.get(url)
-        
-        # التحقق من نجاح الطلب
-        if response.status_code == 200:
-            # حفظ الصورة مؤقتًا
-            image_path = f"qrcode_{user_id}.png"
-            with open(image_path, "wb") as file:
-                file.write(response.content)
+        # عمل طلب HTTP غير متزامن باستخدام aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    # حفظ الصورة مؤقتًا
+                    image_path = f"qrcode_{user_id}.png"
+                    async with aiofiles.open(image_path, "wb") as file:
+                        await file.write(await response.read())
 
-            # إرسال الصورة إلى المستخدم
-            async with aiofiles.open(image_path, "rb") as file:
-                await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
+                    # إرسال الصورة إلى المستخدم
+                    async with aiofiles.open(image_path, "rb") as file:
+                        await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
 
-            # حذف الصورة بعد إرسالها (اختياري)
-            os.remove(image_path)
-        else:
-            await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status_code}")
+                    # حذف الملف المؤقت
+                    os.remove(image_path)
+                else:
+                    await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
         logger.error(f"Error fetching session image: {e}")
         await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")
