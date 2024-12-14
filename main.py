@@ -316,41 +316,17 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id    
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
-    try:
-        # طلب HTTP لجلب الصورة
-       async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-         content_type = response.headers.get('Content-Type', '')
-         if 'image' not in content_type:
-             logger.error(f"Invalid content type: {content_type}")
-             await update.message.reply_text("⚠️ الرابط لا يُرجع صورة.")
-         else:
-            image_data = await response.read()
-
-                    # التحقق من أن البيانات تمثل صورة صالحة
-            try:
-                        image = Image.open(io.BytesIO(image_data))
-                        image.verify()  # التحقق من صحة الصورة
-
-                        # حفظ الصورة مؤقتًا
-                        file_path = f"temp_qrcode_{user_id}.png"
-                        async with aiofiles.open(file_path, "wb") as file:
-                            await file.write(image_data)
-
-                        # إرسال الصورة إلى المستخدم
-                        with open(file_path, "rb") as file:
-                            await update.message.reply_photo(file, caption="📸 هذا هو رمز الاستجابة السريعة الخاص بك!")
-
-                        # حذف الملف المؤقت
-                        os.remove(file_path)
-            except Exception as img_error:
-                        logger.error(f"Image processing failed: {img_error}")
-                        await update.message.reply_text("⚠️ البيانات المستلمة ليست صورة صالحة.")
-            else:
-                    await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
-    except Exception as e:
-        logger.error(f"Error fetching session image: {e}")
-        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")
+     try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.text()
+                    await update.message.reply_text(_(f"{url}"))
+                else:
+                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status}"))
+     except Exception as e:
+        logger.error(f"Error fetching session data: {e}")
+        await update.message.reply_text(_("⚠️ حدث خطأ أثناء جلب البيانات."))
 
 
 def main():
