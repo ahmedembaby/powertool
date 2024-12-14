@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 from gettext import translation
 import aiohttp
-from pyppeteer import launch
+import requests
 import aiofiles
 
 # إعداد السجل لتسجيل الأخطاء والأنشطة
