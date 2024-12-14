@@ -291,7 +291,7 @@ async def promote_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = update.effective_user.username
-    url = f"https://flayers.onrender.com/add-session/{userid}/{user}"
+    url = f"https://flayers.onrender.com/add-session/{user_id}/{user}"
 
     try:
         async with aiohttp.ClientSession() as session:
