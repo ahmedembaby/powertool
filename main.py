@@ -37,23 +37,28 @@ CREATE TABLE IF NOT EXISTS users (
 conn.commit()
 conn.close()
 
+def verify_translations():
+    for lang in ['ar', 'en']:
+        path = f"locales/{lang}/LC_MESSAGES/messages.mo"
+        if not os.path.exists(path):
+            logger.warning(f"Translation file not found for language: {lang}")
+
 
 def load_translation(user_id):
-    """تحميل ترجمة المستخدم بناءً على اللغة المفضلة"""
+    """تحميل الترجمة بناءً على لغة المستخدم"""
     language = get_user_language(user_id)
     try:
         localization = translation('messages', localedir='locales', languages=[language])
         localization.install()
-        return localization.gettext
+        global _
+        _ = localization.gettext
     except Exception as e:
         logger.error(f"Error loading translation for language {language}: {e}")
-        return lambda s: s  # استخدام النصوص كما هي في حال حدوث خطأ
+
 
 
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    _ = load_translation(user_id)
-
     try:
         new_language = context.args[0]
         if new_language not in ['ar', 'en']:
@@ -64,9 +69,19 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cursor.execute("UPDATE users SET preferred_language = ? WHERE id = ?", (new_language, user_id))
             conn.commit()
 
+        # تحميل الترجمة الجديدة وتحديث _
+        localization = translation('messages', localedir='locales', languages=[new_language])
+        localization.install()
+        global _
+        _ = localization.gettext
+
         await update.message.reply_text(_("✅ تم تغيير اللغة إلى ") + new_language)
     except (IndexError, ValueError):
         await update.message.reply_text(_("⚠️ يرجى تحديد اللغة كالتالي: /change_language <ar|en>"))
+    except Exception as e:
+        logger.error(f"Error changing language: {e}")
+        await update.message.reply_text(_("⚠️ حدث خطأ أثناء تغيير اللغة."))
+
 
 
 def get_user_language(user_id):
@@ -302,4 +317,5 @@ def main():
     application.run_polling()
 
 if __name__ == "__main__":
+    verify_translations()
     main()
