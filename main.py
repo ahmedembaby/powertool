@@ -159,6 +159,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /promote - ترقية مستخدم إلى مسؤول (للمسؤولين فقط)
 /show_users - عرض المستخدمين المسجلين (للمسؤولين فقط)
 /change_language - تغيير اللغة المفضلة
+/make_session - عمل جلسة
+/get_session - استدعاء جلسه
         """
     )
     await update.message.reply_text(commands)
@@ -302,7 +304,7 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     data = await response.text()
                     await update.message.reply_text(_(f"📄 تم جلب البيانات بنجاح:\n{data}"))
                 else:
-                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status} & {response.text}"))
+                    await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status}"))
     except Exception as e:
         logger.error(f"Error fetching session data: {e}")
         await update.message.reply_text(_("⚠️ حدث خطأ أثناء جلب البيانات."))
@@ -355,7 +357,8 @@ def main():
         BotCommand("add_points", _( "إضافة نقاط لمستخدم (للمسؤولين فقط)")),
         BotCommand("remove_points", _( "خصم نقاط من مستخدم (للمسؤولين فقط)")),
         BotCommand("change_language", _( "تغيير اللغة المفضلة")),
-        BotCommand("make_session", _( "جلب جلسة جديدة")),
+        BotCommand("make_session", _( "عمل جلسة جديدة")),
+        BotCommand("get_session", _( "استدعاء جلسة ")),
     ]
     application.bot.set_my_commands(commands)
 
@@ -369,6 +372,7 @@ def main():
     application.add_handler(CommandHandler("add_points", add_points))
     application.add_handler(CommandHandler("remove_points", remove_points))
     application.add_handler(CommandHandler("make_session", make_session))
+    application.add_handler(CommandHandler("get_session", get_session))
 
     # بدء البوت
     application.run_polling()
