@@ -319,12 +319,12 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         # طلب HTTP لجلب الصورة
        async with aiohttp.ClientSession() as session:
-       async with session.get(url) as response:
-        content_type = response.headers.get('Content-Type', '')
-        if 'image' not in content_type:
-            logger.error(f"Invalid content type: {content_type}")
-            await update.message.reply_text("⚠️ الرابط لا يُرجع صورة.")
-        else:
+        async with session.get(url) as response:
+         content_type = response.headers.get('Content-Type', '')
+         if 'image' not in content_type:
+             logger.error(f"Invalid content type: {content_type}")
+             await update.message.reply_text("⚠️ الرابط لا يُرجع صورة.")
+         else:
             image_data = await response.read()
 
                     # التحقق من أن البيانات تمثل صورة صالحة
