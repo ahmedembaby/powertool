@@ -42,8 +42,20 @@ def create_db():
 
 create_db()
 
+def load_translation(user_id):
+    """تحميل ترجمة المستخدم بناءً على اللغة المفضلة"""
+    language = get_user_language(user_id)
+    try:
+        localization = translation('messages', localedir='locales', languages=[language])
+        localization.install()
+        return localization.gettext
+    except Exception as e:
+        logger.error(f"Error loading translation for language {language}: {e}")
+        return lambda s: s  # استخدام النصوص كما هي في حال حدوث خطأ
+
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     try:
         new_language = context.args[0]
@@ -69,14 +81,6 @@ def get_user_language(user_id):
     except DatabaseError as e:
         logger.error(f"Error while getting user language: {e}")
         return 'en'
-
-async def localized_reply(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str):
-    user_language = get_user_language(update.effective_user.id)
-    localization = translation('messages', localedir='locales', languages=[user_language])
-    localization.install()
-    _ = localization.gettext
-
-    await update.message.reply_text(_(message))
 
 # Admin
 def is_admin(user_id):
@@ -106,6 +110,7 @@ def save_user(user):
 # وظيفة بدء البوت
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    _ = load_translation(user.id)
     try:
         with sqlite3.connect("users.db") as conn:
             cursor = conn.cursor()
@@ -124,6 +129,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # وظيفة عرض قائمة الأوامر
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    _ = load_translation(update.effective_user.id)
     commands = _(
         """
 قائمة الأوامر المتاحة:
@@ -140,6 +146,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # وظيفة لعرض المستخدمين المسجلين
 async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     if not is_admin(user_id):
         await update.message.reply_text(_("🚫 هذا الأمر متاح فقط للمسؤولين."))
@@ -167,6 +174,7 @@ async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # وظيفة عرض النقاط
 async def show_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     try:
         with sqlite3.connect("users.db") as conn:
@@ -186,6 +194,7 @@ async def show_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # إضافة نقاط
 async def add_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     if not is_admin(user_id):
         await update.message.reply_text(_("🚫 هذا الأمر متاح فقط للمسؤولين."))
@@ -212,6 +221,7 @@ async def add_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # خصم نقاط
 async def remove_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     if not is_admin(user_id):
         await update.message.reply_text(_("🚫 هذا الأمر متاح فقط للمسؤولين."))
@@ -238,6 +248,7 @@ async def remove_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ترقية مستخدم
 async def promote_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    _ = load_translation(user_id)
 
     if not is_admin(user_id):
         await update.message.reply_text(_("🚫 هذا الأمر متاح فقط للمسؤولين."))
@@ -288,5 +299,6 @@ def main():
     # بدء البوت
     application.run_polling()
 
-if __name__ == "__main__":
-    main()
+
+    if __name__ == "__main__":
+        main()
