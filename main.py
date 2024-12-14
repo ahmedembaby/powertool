@@ -322,7 +322,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # حفظ الصورة مؤقتًا
                     image_path = f"qrcode_{user_id}.png"
                     async with aiofiles.open(image_path, "wb") as file:
-                        await file.write(await response.read())
+                        await file.write(await response.read())  # تأكد من أن `await` موجود هنا
 
                     # إرسال الصورة إلى المستخدم
                     async with aiofiles.open(image_path, "rb") as file:
@@ -334,7 +334,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
         logger.error(f"Error fetching session image: {e}")
-        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")
+        await update.message.reply_text("⚠️ حدث خطأ أثناء جلب الصورة.")  # تأكد من وضع `await`
 
 
 def main():
