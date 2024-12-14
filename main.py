@@ -328,7 +328,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
             image_data = await response.read()
 
                     # التحقق من أن البيانات تمثل صورة صالحة
-                    try:
+            try:
                         image = Image.open(io.BytesIO(image_data))
                         image.verify()  # التحقق من صحة الصورة
 
@@ -343,10 +343,10 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                         # حذف الملف المؤقت
                         os.remove(file_path)
-                    except Exception as img_error:
+            except Exception as img_error:
                         logger.error(f"Image processing failed: {img_error}")
                         await update.message.reply_text("⚠️ البيانات المستلمة ليست صورة صالحة.")
-                else:
+            else:
                     await update.message.reply_text(f"⚠️ حدث خطأ أثناء جلب الصورة. كود الحالة: {response.status}")
     except Exception as e:
         logger.error(f"Error fetching session image: {e}")
