@@ -312,12 +312,9 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #getsession
 async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    
+    user_id = update.effective_user.id    
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
-  
-
- try:
+    try:
         # إرسال طلب GET إلى الرابط
         response = requests.get(url)
         
