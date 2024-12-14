@@ -12,10 +12,6 @@ from sqlite3 import DatabaseError
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")  # استيراد رمز الوصول من متغير البيئة
 
-# إعداد الترجمة
-localization = translation('messages', localedir='locales', languages=['ar', 'en'])
-localization.install()
-_ = localization.gettext
 
 # إعداد التسجيل (Logging)
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
