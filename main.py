@@ -341,6 +341,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
         os.remove(screenshot_path)
     except Exception as e:
         logger.error(f"Error capturing screenshot: {e}")
+        print(url)
         await update.message.reply_text(_("⚠️ حدث خطأ أثناء التقاط لقطة الشاشة."))
 
 
