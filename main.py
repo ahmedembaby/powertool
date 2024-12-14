@@ -316,7 +316,7 @@ async def make_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id    
     url = f"https://flayers.onrender.com/qrcode/{user_id}"
-     try:
+    try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -324,7 +324,7 @@ async def get_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await update.message.reply_text(_(f"{url}"))
                 else:
                     await update.message.reply_text(_(f"⚠️ فشل في جلب البيانات. كود الحالة: {response.status}"))
-     except Exception as e:
+    except Exception as e:
         logger.error(f"Error fetching session data: {e}")
         await update.message.reply_text(_("⚠️ حدث خطأ أثناء جلب البيانات."))
 
